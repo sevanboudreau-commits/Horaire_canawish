@@ -1,0 +1,37 @@
+name: Build Windows Executable
+
+name: Build Windows Executable
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Installer le code source
+      uses: actions/checkout@v4
+
+    - name: Configurer Python
+      uses: actions/setup-python@v5
+      with:
+        python-base-architecture: 'x64'
+        python-version: '3.11' # On utilise 3.11 pour éviter les bugs de compatibilité avec PyInstaller
+
+    - name: Installer les dépendances
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install pyinstaller
+        python -m pip install -r requirements.txt
+
+    - name: Compiler l'application avec PyInstaller
+      run: |
+        # REMPLACEZ 'main.py' par le nom du script principal de votre application (ex: app.py)
+        # --noconsole empêche une invite de commande noire d'apparaître derrière votre interface Qt
+        # --onefile compile le tout en un unique fichier .exe
+        pyinstaller --noconsole --onefile cacanawish_horaire.py
+
+    - name: Sauvegarder le fichier .exe (Artifact)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Windows-Executable
+        path: dist/*.exe
